@@ -1,0 +1,121 @@
+<!-- plugins/dashboard/templates/tweets.html -->
+{% extends "base.html" %}
+
+{% block title %}مشاهده توییت‌ها{% endblock %}
+{% block page_title %}توییت‌های جمع‌آوری شده{% endblock %}
+
+{% block page_actions %}
+<div class="dropdown">
+    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        فیلتر وضعیت
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+        <li><a class="dropdown-item" href="/tweets">همه</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=collected">جمع‌آوری شده</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=filtered_accepted">پذیرفته شده</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=filtered_spam">اسپم</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=filtered_offensive">توهین‌آمیز</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=filtered_propaganda">تبلیغاتی</a></li>
+        <li><a class="dropdown-item" href="/tweets?status=filtered_low_quality">کم‌کیفیت</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- جدول توییت‌ها -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">توییت‌ها</h6>
+        {% if status %}
+        <span class="badge bg-info">فیلتر شده: {{ status }}</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>متن توییت</th>
+                        <th>نویسنده</th>
+                        <th>زمان انتشار</th>
+                        <th>آمار</th>
+                        <th>وضعیت پردازش</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tweet in tweets %}
+                    <tr>
+                        <td>{{ tweet.content }}</td>
+                        <td>{{ tweet.user_id }}</td>
+                        <td dir="ltr">{{ tweet.created_at }}</td>
+                        <td>
+                            <small>
+                                <span title="ریتوییت‌ها"><i class="fas fa-retweet"></i> {{ tweet.retweet_count }}</span> |
+                                <span title="لایک‌ها"><i class="fas fa-heart"></i> {{ tweet.like_count }}</span> |
+                                <span title="پاسخ‌ها"><i class="fas fa-reply"></i> {{ tweet.reply_count }}</span>
+                            </small>
+                        </td>
+                        <td>
+                            {% if tweet.processing_status == 'collected' %}
+                            <span class="badge bg-info">در انتظار پردازش</span>
+                            {% elif tweet.processing_status == 'filtered_accepted' %}
+                            <span class="badge bg-success">قبول شده</span>
+                            {% elif tweet.processing_status == 'filtered_spam' %}
+                            <span class="badge bg-warning">اسپم</span>
+                            {% elif tweet.processing_status == 'filtered_offensive' %}
+                            <span class="badge bg-danger">توهین‌آمیز</span>
+                            {% elif tweet.processing_status == 'filtered_propaganda' %}
+                            <span class="badge bg-secondary">تبلیغاتی</span>
+                            {% elif tweet.processing_status == 'filtered_low_quality' %}
+                            <span class="badge bg-dark">کم‌کیفیت</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">{{ tweet.processing_status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- صفحه‌بندی -->
+        <nav aria-label="صفحه‌بندی">
+            <ul class="pagination justify-content-center mt-3">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="/tweets?limit={{ pagination.limit }}&offset={{ pagination.prev_offset }}{% if status %}&status={{ status }}{% endif %}" aria-label="قبلی">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="قبلی">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">
+                        صفحه {{ (pagination.current_offset // pagination.limit) + 1 }} از {{ (pagination.total_count // pagination.limit) + 1 }}
+                    </a>
+                </li>
+                
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="/tweets?limit={{ pagination.limit }}&offset={{ pagination.next_offset }}{% if status %}&status={{ status }}{% endif %}" aria-label="بعدی">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="بعدی">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

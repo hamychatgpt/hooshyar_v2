@@ -1,0 +1,96 @@
+<!-- plugins/dashboard/templates/keywords.html -->
+{% extends "base.html" %}
+
+{% block title %}مدیریت کلمات کلیدی{% endblock %}
+{% block page_title %}مدیریت کلمات کلیدی{% endblock %}
+
+{% block page_actions %}
+<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addKeywordModal">
+    افزودن کلمه کلیدی
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- جدول کلمات کلیدی -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">کلمات کلیدی</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>کلمه کلیدی</th>
+                        <th>اولویت</th>
+                        <th>حداکثر توییت روزانه</th>
+                        <th>آخرین جستجو</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for keyword in keywords %}
+                    <tr>
+                        <td>{{ keyword.text }}</td>
+                        <td>{{ keyword.priority }}</td>
+                        <td>{{ keyword.max_tweets_per_day }}</td>
+                        <td dir="ltr">{% if keyword.last_search_at %}{{ keyword.last_search_at }}{% else %}هنوز جستجو نشده{% endif %}</td>
+                        <td>
+                            {% if keyword.is_active %}
+                            <span class="badge bg-success">فعال</span>
+                            {% else %}
+                            <span class="badge bg-secondary">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/keywords/{{ keyword.id }}/toggle" class="btn btn-sm btn-info">
+                                    {% if keyword.is_active %}غیرفعال کردن{% else %}فعال کردن{% endif %}
+                                </a>
+                                <a href="/keywords/{{ keyword.id }}/delete" class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('آیا از حذف این کلمه کلیدی اطمینان دارید؟')">
+                                    حذف
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal افزودن کلمه کلیدی -->
+<div class="modal fade" id="addKeywordModal" tabindex="-1" aria-labelledby="addKeywordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addKeywordModalLabel">افزودن کلمه کلیدی جدید</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/keywords/add" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="text" class="form-label">کلمه کلیدی</label>
+                        <input type="text" class="form-control" id="text" name="text" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">اولویت (1-10)</label>
+                        <input type="number" class="form-control" id="priority" name="priority" min="1" max="10" value="5">
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_tweets_per_day" class="form-label">حداکثر توییت روزانه</label>
+                        <input type="number" class="form-control" id="max_tweets_per_day" name="max_tweets_per_day" min="10" max="1000" value="100">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
